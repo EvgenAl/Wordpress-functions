@@ -1,0 +1,842 @@
+
+ПРИ СОЗДАНИИ ТЕМЫ В ФАЙЛЕ CSS
+
+
+/*
+Theme Name:
+Theme URI:
+Description:
+Version:
+Author:
+Author URI:
+License:
+License URI:
+Tags:
+*/
+
+
+
+
+
+СОЗДАНИЕ ПОЛЬЗОВАТЕЛЬСКОГО ШАБЛОНА
+
+
+
+<?php
+/*   
+Template Name: Главная страница
+*/
+?>
+
+
+
+
+
+
+МОДУЛЬНАЯ РАБОТА С ФАЙЛАМИ, РАЗБИВАЕМ СТРАНИЦУ НА ОТДЕЛЬНЫЕ БЛОКИ
+
+
+<?php get_header(); ?>
+<?php get_footer(); ?>
+<?php get_sidebar(); ?>
+
+
+
+
+
+
+
+ПОЛУЧЕНИЕ ОПЦИЙ ИЗ БАЗЫ ДАННЫХ ИЛИ КЭША
+
+
+get_option( $option, $default );
+$option(строка) (обязательный)
+
+Название опции, значение которой нужно получить. Некоторые из доступных опций:
+
+admin_email - E-mail администратора блога.
+blogname - название блога. Устанавливается в настройках.
+blogdescription - описание блога. Устанавливается в настройках.
+blog_charset - Кодировка блога. Устанавливается в настройках.
+date_format - формат даты. Устанавливается в настройках.
+default_category - категория постов по умолчанию. Устанавливается в настройках.
+home - Адрес домашней страницы блога. Устанавливается в основных настройках.
+siteurl - Адрес WordPress. Устанавливается в основных настройках.
+
+Заметка: siteurl отличается от get_bloginfo('siteurl') (который возвращает url домашней страницы блога). И не отличается от get_bloginfo('wpurl').
+template - название текущей темы.
+start_of_week - день с которого начинается неделя. Устанавливается в основных настройках.
+upload_path - каталог загрузки по умолчанию.  Устанавливается в настройках.
+posts_per_page - максимальное число постов на странице.  Устанавливается в настройках чтения.
+posts_per_rss -  максимальное число постов выводимых в фид.  Устанавливается в настройках чтения.
+
+Полный список опций смотрите в кодексе WordPress.
+По умолчанию: нет
+$default(строка/число/логический)
+Значение по умолчанию, которое нужно вернуть, если не удалось получить опцию (если опции в БД не существует).
+По умолчанию: false
+
+
+
+
+
+
+
+
+АБСОЛЮТНЫЙ АДРЕС ОТНОСИТЕЛЬНО САЙТА, ПРИ ПОДКЛЮЧЕНИИ КАРТИНОК, СТИЛЕЙ, СКРИПТОВ.Получает URL текущей темы
+
+
+<?php echo  get_template_directory_uri();?>
+
+
+
+
+
+
+БЕЗОПАСНОЕ ПОДКЛЮЧЕНИЕ СТИЛЕЙ И СКРИПТОВ
+
+/**
+* загружаемые скрипты и стили
+*/
+function load_style_script(){
+	wp_enqueue_script('jquery-google', 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js');
+	wp_enqueue_script('jquery-flexslider', get_template_directory_uri() . '/js/jquery.flexslider.js');
+	wp_enqueue_script('jquery-easing', get_template_directory_uri() . '/js/jquery.easing.js');
+	wp_enqueue_script('jquery-mousewheel', get_template_directory_uri() . '/js/jquery.mousewheel.js');
+	wp_enqueue_script('demo', get_template_directory_uri() . '/js/demo.js');
+	wp_enqueue_script('jquery-ui-1.9.2', get_template_directory_uri() . '/js/jquery-ui-1.9.2.custom.js');
+	wp_enqueue_style('style', get_template_directory_uri() . '/style.css');
+	wp_enqueue_style('style-flexslider', get_template_directory_uri() . '/flexslider.css');
+	wp_enqueue_style('style-jquery-ui-1.9.2', get_template_directory_uri() . '/css/jquery-ui-1.9.2.custom.css');
+}
+
+/**
+* загружаем скрипты и стили
+*/
+add_action('wp_enqueue_scripts', 'load_style_script');
+
+
+
+
+
+
+
+
+
+НАСТРОЙКИ САЙТА
+
+
+<?php bloginfo('name'); ?>
+<?php bloginfo('description'); ?>
+<?php bloginfo('admin_email');?>
+
+
+
+
+
+
+
+ОБЯЗАТЕЛЬНЫЙ ВЫЗОВ СОБЫТИЙ ДЛЯ КОРРЕКТНОЙ РАБОТЫ ПЛАГИНОВ, ВСТАВЛЯЕТСЯ В КОНЦЕ ЭЛЕМЕНТОВ HEAD И FOOTER
+
+<?php wp_footer(); ?>
+<?php wp_head(); ?>
+
+
+
+
+
+ССЫЛКА НА ГЛАВНУЮ СТРАНИЦУ САЙТА
+
+
+<?php echo home_url();?>
+
+
+
+
+ВЫВОД ЗАГОЛОВКА КАТЕГОРИИ(РУБРИКИ)(КАТЕГОРИИ РАЗЛИЧАЮТ ПО ID)
+
+<?php echo get_cat_name( 2 ); ?>
+
+ВЫВОД ОПИСАНИЯ КАТЕГОРИИ(РУБРИКИ)
+
+<?php echo category_description(2); ?>
+
+ССЫЛКА НА КАТЕГОРИЮ
+
+<?php echo get_category_link( $id ); ?>
+
+ВЫВОДИТ КАТЕГОРИЮ К КОТОРОЙ ОТНОСИТСЯ ПОСТ
+
+<?php $cat = get_the_category( ); ?>
+<h1><?php echo $cat[0]->name; ?></h1>
+
+<?php
+if (is_category(9)) {
+   // для постов 9 категории
+   include(TEMPLATEPATH . '/single2.php');
+} else {
+   // для других постов
+   include(TEMPLATEPATH . '/single1.php');
+}
+?>
+для создания различных стилей, в зависимости от номера категории, код может выглядеть следующим образом: 
+
+
+
+
+
+
+
+
+
+ВЫВОД ЗАПИСЕЙ/ПОСТОВ (P = ID ЗАПИСИ или категории CAT)
+
+
+<?php if ( have_posts() ) : query_posts('p=1');
+while (have_posts()) : the_post(); ?>
+
+<?php the_title(); ?> 		ЗАГОЛОВОК ПОСТА
+<?php the_content(); ?>		СОДЕРЖАНИЕ ПОСТА
+<?php get_the_excerpt() ; ?> цитата
+<?php the_post_thumbnail(array(100, 100)); ?>
+
+<?php  the_author(); ?> вывод автора поста
+<?php  the_time(); ?> вывод даты публикации поста
+<? endwhile; endif; wp_reset_query(); ?>
+
+
+<?php if ( has_post_thumbnail() ) : ?>
+<a class="popup" href="<?php
+$large_image_url = wp_get_attachment_image_src( get_post_thumbnail_id(), 'large' );ccылка на полноразмерную фотографию
+echo $large_image_url[0];
+?>"><?php the_post_thumbnail(array(220, 220)); ?></a>
+<?php endif; ?>
+
+
+
+УБИРАЕМ ССЫЛКУ ЧИТАТЬ ДАЛЕЕ
+add_filter( 'the_content_more_link', '__return_empty_string' ); 
+
+
+
+
+
+
+
+ДОПОЛНИТЕЛЬНЫЕ ПОЛЯ В ЗАПИСЯХ
+
+<?php echo get_post_meta($post->ID, 'resume_years', true); ?>
+
+
+ЦИКЛ ВЫВОДА ПРОИЗВОЛЬНЫХ ПОЛЕЙ
+
+
+
+#1. Получим все произвольные поля записи
+
+Используйте следующий пример, чтобы передать в переменную $custom_fields все данные о произвольных полях текущего поста.
+
+$custom_fields = get_post_custom($post_id);
+
+#2. Получим одинаковые метаполя записи с разными значениями
+
+Получим значения произвольных полей с ключом my_custom_field у поста 72 (подразумевается что у поста таких полей 3 со значениями "dogs", "47" и "селфи" )
+
+$custom_fields = get_post_custom(72);
+$my_custom_field = $custom_fields['my_custom_field'];
+foreach ( $my_custom_field as $key => $value )
+	echo $key . " => " . $value . "<br />";
+В результате на экране мы увидим следующее:
+0 => dogs
+1 => 47
+2 => селфи
+
+
+
+
+
+
+
+
+ВЫВОД МЕТОК ЗАПИСЕЙ
+
+
+function my_list_tags(){
+	$tags = get_the_tags();
+	$tag_str = null;//объявляем переменную, кот будет выводить тег с метками
+	if($tags){
+		$tag_str = '<p>';
+		foreach($tags as $tag){
+			$tag_str .= $tag->name . ', ';
+		}
+		$tag_str = rtrim($tag_str, ', ');
+		$tag_str .= '</p>';
+	}
+	echo $tag_str;
+}
+
+1.пишем пользовательскую функцию
+2.присваиваем в переменную массив меток
+3.если метки есть, то:
+4.открываем тег абзаца
+5.запускаем цикл, который перебирает элементы массива
+6.в переменную вывода возвращаем значение каждого элемента массива и добавляем разделитель
+7.убираем разделители - запятую и пробел
+8.закрываем тег вывода
+9.выводим его значение
+
+
+
+
+
+
+
+
+
+
+РЕГИСТАРЦИЯ И ВЫЗОВ ВИДЖЕТОВ
+
+//В ФАЙЛЕ FUNCTIONS
+
+<?php
+
+add_action( 'widgets_init', 'logo_widget_init' );
+function logo_widget_init(){
+	register_sidebar( array(
+		'name'          => 'Логотип SVG',
+		'id'            => "logo",
+		'class'         => '',
+		'before_widget' => '',
+		'after_widget'  => "",
+		'before_title'  => '<span class="hidden">',
+		'after_title'   => "</span>",
+	) );
+}
+
+
+;?>
+
+
+//В САМОМ ВИДЖЕТЕ
+<?php
+if ( function_exists('dynamic_sidebar') )
+dynamic_sidebar('logo');
+?>
+
+
+
+
+
+
+
+
+
+РЕГИСТРАЦИЯ МЕНЮ
+
+
+add_action('after_setup_theme', function(){
+	register_nav_menus( array(
+		'header_menu' => 'Меню в шапке',
+		'footer_menu' => 'Меню в подвале'
+	) );
+});
+
+
+Выводить меню в шаблоне будем функцией wp_nav_menu(array(
+	'theme_location'  => '',
+	'menu'            => '', 
+	'container'       => 'div', 
+	'container_class' => '', 
+	'container_id'    => '',
+	'menu_class'      => 'menu', 
+	'menu_id'         => '',
+	'echo'            => true,
+	'fallback_cb'     => 'wp_page_menu',
+	'before'          => '',
+	'after'           => '',
+	'link_before'     => '',
+	'link_after'      => '',
+	'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+	'depth'           => 0,
+	'walker'          => '',
+) ).
+
+
+
+
+
+
+
+
+
+
+THUMBNAILS МИНИАТЮРА ЗАПИСИ
+
+В FUNCTIONS ДОБАВЛЯЕМ
+
+add_theme_support('post-thumbnails');
+
+
+Миниатюра-ссылка на оригинальный размер
+<?php 
+
+
+$large_image_url = wp_get_attachment_image_src( get_post_thumbnail_id(), 'large');
+echo $large_image_url[0];
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+ДОБАВЛЕНИЕ ИЛИ ВЫВОД МЕТКИ ЗАПИСИ
+
+
+
+<?php
+$tags = wp_get_post_tags($post->ID);
+if ($tags) {
+foreach($tags as $tag) {
+echo ' ' . $tag->name;
+}
+}
+?>
+
+
+
+
+
+ВЫВОД НАЗВАНИЯ ТЕКУЩЕЙ МЕТКИ
+single_cat_title()
+ если функция была использована на странице архива категорий — 
+то она выведет/вернёт название текущей категории, на странице архива меток — 
+название текущей метки, на странице архива другой таксономии — название текущего элемента таксономии.
+
+Вывести название текущего элемента таксономии вы также можете функцией single_term_title().
+
+
+
+
+
+
+
+
+
+
+ЦИКЛ ВЫВОДА ЗАПИСЕЙ 
+
+
+
+<?php if (have_posts()) :  while (have_posts()) : the_post(); ?>
+       
+
+<?php the_title(); ?> 		ЗАГОЛОВОК ПОСТА
+<?php the_content(); ?>		СОДЕРЖАНИЕ ПОСТА
+<?php get_the_excerpt() ; ?> цитата
+<<?php the_post_thumbnail('full',array('class'=>'artical')); ?>
+
+<?php  the_author(); ?> вывод автора поста
+<?php  the_time(); ?> вывод даты публикации поста
+
+<?php the_permalink(); ?> возвращает ссылку на текущую запись
+
+<?php endwhile; ?>
+<?php endif; ?>
+
+
+
+
+
+
+
+
+
+
+ВЫВОД ПРЕДИДУЩЕЙ И СЛЕДУЮЩЕЙ ЗАПИСЕЙ
+
+
+<?php previous_post_link($format, $link, $in_same_cat = false, $excluded_categories = ''); ?>
+<?php next_post_link($format, $link, $in_same_cat, $excluded_categories); ?>
+
+
+
+
+
+
+
+
+
+
+
+
+ВЫВОД КОММЕНТАРИЕВ
+
+
+<?php comments_popup_link(); ?>
+
+
+<?php comments_template(); ?> 	
+
+либо же взять из любой другой темы
+
+
+
+
+
+
+
+
+
+
+
+
+
+ССЫЛКА НА ГЛАВНУЮ СТРАНИЦУ
+
+<?php echo get_home_url(); ?>
+
+
+
+
+
+
+
+
+
+
+ВЫВОДИТ ЗАГОЛОВОК СТРАНИЦЫ
+
+
+
+<title><?php echo wp_get_document_title(); ?></title>
+
+
+
+
+
+
+
+
+
+
+
+
+ВЫВОД ПОСТРАНИЧНОЙ НАВИГАЦИИ
+
+
+<?php posts_nav_link( $sep, $prelabel, $nextlabel ); ?>
+
+
+
+
+
+
+
+
+
+
+
+СОЗДАНИЕ НОВОГО ИЛИ ИЗМЕНЕНИЕ ИМЕЮЩЕГОСЯ ТИПА ЗАПИСИ
+
+
+add_action('init', 'my_custom_init');
+function my_custom_init(){
+	register_post_type('slider', array(
+		'labels'             => array(
+			'name'               => 'слайдеры', 
+			'singular_name'      => 'слайдер', 
+			'add_new'            => 'Добавить новый',
+			'add_new_item'       => 'Добавить новый слайд',
+			'edit_item'          => 'Редактировать слайдер',
+			'new_item'           => 'Новый слайдер',
+			'view_item'          => 'Посмотреть слайдер',
+			'search_items'       => 'Найти слайдер',
+			'not_found'          =>  'слайдер не найдено',
+			'not_found_in_trash' => 'В корзине слайдеров не найдено',
+			'parent_item_colon'  => '',
+			'menu_name'          => 'Слайдеры',
+			'all items'          => 'Все Слайдеры'
+
+		  ),
+		'public'             => true,
+		'publicly_queryable' => true,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'query_var'          => true,
+		'rewrite'            => true,
+		'capability_type'    => 'post',
+		'has_archive'        => true,
+		'hierarchical'       => false,
+		'menu_position'      => null,
+		'supports'           => array('title','editor','author','thumbnail','excerpt','comments','custom-fields')
+	) );
+}
+
+
+<?php $slider = new WP_Query(array('post_type' => 'slider', 'order' => 'ASC')) ?>
+
+<?php if ( $slider->have_posts() ) : ?>
+       <div class="slider">
+        <div class="flexslider">
+          <ul class="slides">
+
+<?php while ( $slider->have_posts() ) : $slider->the_post(); ?>
+            <li>
+            	<div class="slide-content">
+                    <?php the_content(); ?>
+                </div>
+  	    	    <?php the_post_thumbnail('full'); ?>
+  	    	</li>
+<?php endwhile; ?>
+          </ul>
+        </div>
+      </div>
+<?php else: ?>
+ <div><h1>Место для слайдера</h1></div>
+<?php endif; ?>
+?>
+
+
+
+
+
+
+
+СОЗДАНИЕ WP_QUERY
+
+
+<?php
+$id = 5; // номер категории
+$posts_about = new WP_Query(array('cat' => $id, 'posts_per_page' => 3));
+?>
+
+
+<?php if ( $posts_about->have_posts() ) : while ( $posts_about->have_posts() 
+
+	) : $posts_about->the_post(); ?>
+
+	<div class="artical-anons-main">
+		<?php the_post_thumbnail('full',array('class'=>'artical'); ?>
+		<div class="artical-head">
+			<h1><?php the_title(); ?></h1>
+			<p><?php my_list_tags();?></p>
+		</div>
+		<?php echo get_the_excerpt() ; ?>
+		<p><a href="<?php the_permalink(); ?>" class="read-more">Read more</a></p>
+	</div>
+
+
+
+<?php endwhile; ?>
+
+<?php else: ?>
+	
+<?php endif; ?>
+
+Выбирает записи из базы данных по указанным критериям. На основе WP_Query работают функции get_posts() и query_posts() и все остальные запросы связанные с выбором записей из таблицы wp_posts.
+
+
+
+
+
+
+
+
+
+СОЗДАНИЕ ШАБЛОНА ЗАПИСИ ДЛЯ ОТДЕЛЬНОЙ КАТЕГОРИИ
+
+
+/*single for category*/
+
+
+add_filter('single_template', 'check_for_category_single_template');
+function check_for_category_single_template( $t )
+{
+  foreach( (array) get_the_category() as $cat ) 
+  { 
+    if ( file_exists(TEMPLATEPATH . "/single-category-{$cat->slug}.php") ) return TEMPLATEPATH . "/single-category-{$cat->slug}.php"; 
+    if($cat->parent)
+    {
+      $cat = get_the_category_by_ID( $cat->parent );
+      if ( file_exists(TEMPLATEPATH . "/single-category-{$cat->slug}.php") ) return TEMPLATEPATH . "/single-category-{$cat->slug}.php";
+    }
+  } 
+  return $t;
+}
+
+
+
+
+
+
+
+
+
+ШОРТКОД ГАЛЛЕРЕИ
+
+
+
+function theme2_gallery($attr, $text=''){
+	// получаем массив ID картинок
+	$img_src = explode(",", $attr['ids']);
+	// шаблон удаления атрибутов width/height
+	$pattern = '#(width|height)="\d+"#';
+	$return = '<ul id="slide_2" class="slidik">';
+	// счетчик
+	$i = 1;
+	foreach ($img_src as $item) {
+		// получаем HTML-код картинки
+		$image_url = wp_get_attachment_image( $item, 'full' );
+		// вырезаем атрибуты width/height
+		$image_url = preg_replace($pattern, "", $image_url);
+		// формируем вывод картинок
+		if($i == 1) $return .= '<li class="show">' . $image_url . '</li>';
+		else $return .= '<li>' . $image_url . '</li>';
+		$i++;
+	}
+	$return .= '<a data-slidik="slide_2" class="next" href="#">Next</a>
+            <a data-slidik="slide_2" class="prev" href="#">Prev</a>
+            <div class="captionWrap"><div data-slidik="slide_2" class="caption"></div></div>
+            <div class="portfolio-close"><a href="#"></a></div>
+    	</ul>';
+    echo $return;
+}
+add_shortcode('shortcode_gallery', 'theme2_gallery');
+
+
+
+
+
+
+
+
+ПОЛЬЗОВАТЕЛЬСКИЕ НАСТРОЙКИ
+
+
+
+
+
+
+function my_more_options(){
+	// создаем поле опции
+	// $id, $title, $callback, $page, $section, $args
+	add_settings_field(
+		'phone', // $id - Название опции (идентификатор)
+		'Телефон', // $title - Заголовок поля
+		'display_phone', // $callback - callback function
+		'general' // $page - Страница меню в которую будет добавлено поле
+	);
+
+	// Регистрирует новую опцию и callback функцию (функцию обратного вызова) для обработки значения опции при её сохранении в БД.
+	// $option_group, $option_name, $sanitize_callback
+	register_setting(
+		'general', //Название группы, к которой будет принадлежать опция. Это название должно совпадать с названием группы в функции settings_fields()
+		'my_phone' //Название опции, которая будет сохраняться в БД
+	);
+}
+add_action('admin_init', 'my_more_options');
+function display_phone(){
+	echo "<input type='text' class='regular-text' name='my_phone' value='" . esc_attr(get_option('my_phone')) . "'>";
+}
+
+
+
+
+
+ХЛЕБНЫЕ КРОШКИ
+
+
+
+<p class="page-title-map">
+<a href="<?php echo home_url();?>">
+Home
+</a>  / 
+<a href="<?php echo get_category_link($cat[0]->cat_ID );?>">
+<?php echo $cat[0]->name; ?>
+</a> /
+<?php the_title(); ?> 
+</p>
+
+
+
+
+
+
+СЛАЙДЕР ПО ID КАРТИНОК В ПРОИЗВОЛЬНЫХ ПОЛЯХ
+
+
+
+
+
+<!-- Слайдер -->
+<?php $gallery = get_post_meta($post->ID, 'gallery', true); ?>
+<?php if(!empty($gallery)) : $gallery = explode(",", $gallery); ?>
+	<div class="slider-porfolio">
+    	<div class="flexslider">
+    		<ul class="slides">
+<?php foreach($gallery as $item): ?>
+	<li>  	    	    
+        <?php echo wp_get_attachment_image($item, 'full'); ?>
+        <img src="<?php bloginfo('template_url') ?>/images/portfolio-shadow.png" alt="" />
+    </li>
+<?php endforeach; ?>
+    		</ul>
+   		</div>
+	</div>
+<?php endif; ?>
+<!-- Слайдер -->
+
+
+
+
+
+
+
+
+
+ВЫВОД НАЗВАНИЯ И КОНТЕНТА ОДНОЙ СТРАНИЦЫ НА ДРУГОЙ
+
+
+<?php
+
+$id = 149; 
+$post = get_page($id);
+$content = $post->post_content;
+$title = get_the_title($id);
+echo "<h1>$title</h1>";
+echo $post->post_content;
+
+ ?>
+
+
+
+
+
+
+
+
+ФОРМА ПОИСКА
+
+В папке темы создайте новый файл searchform.php и сохраните в него код формы поиска:
+<form name="search" action="<?php echo home_url( '/' ) ?>" method="get" class="search-form">
+<input type="text" value="<?php echo get_search_query() ?>" name="s" placeholder="<?php echo __('Search', 'whitesquare');>"class="input">
+<button type="submit" class="button"><?php echo __('GO', 'whitesquare'); ?></button>
+</form>
+
+
+Код выводящий количество результатов поиска 
+
+<?php $allsearch = &new WP_Query("s=$s&showposts=-1"); 
+$key = wp_specialchars($s, 1); 
+$count = $allsearch->post_count; _e('');  
+echo $count . ' '; 
+_e('результатов'); 
+wp_reset_query(); ?>
+<span> для <?php echo get_search_query(); ?></span>
